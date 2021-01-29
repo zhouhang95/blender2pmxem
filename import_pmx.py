@@ -47,7 +47,7 @@ GlobalMatrix = mathutils.Matrix(
     ([1, 0, 0, 0],
      [0, 0, 1, 0],
         [0, 1, 0, 0],
-        [0, 0, 0, 5]))
+        [0, 0, 0, 12.5]))
 
 
 def GT(vec, mat):  # GlobalTransformation
