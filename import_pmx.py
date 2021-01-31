@@ -258,18 +258,8 @@ def read_pmx_data(context, filepath="",
 
     with open(filepath, "rb") as f:
 
-        from .pmx import pmx
         pmx_data = pmx.Model()
         pmx_data.Load(f)
-
-        if pmx_data.Status.Magic == 0:
-            # Echo("Loading Pmd ")
-            from . import pmd
-            from . import pmd2pmx
-            f.seek(0)
-            d_pmd = pmd.Model()
-            d_pmd.Load(f)
-            pmx_data = pmd2pmx.Convert(d_pmd)
 
         scene = context.scene
         base_path = os.path.dirname(filepath)
