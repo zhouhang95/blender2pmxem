@@ -490,62 +490,6 @@ def add_copy_rotation(context, active, target_name, influence=1.0):
         const.invert_z = True
 
 
-class B2PMXEM_OT_AddCopyRot(bpy.types.Operator):
-    '''Add Copy Rotation Constraint to the active Bone for MMD'''
-    bl_idname = "b2pmxem.add_rotation"
-    bl_label = "Add Copy Rotation"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.active_object
-        return (obj and obj.type == 'ARMATURE' and obj.mode == 'POSE')
-
-    def execute(self, context):
-        active_pose, target_pose = get_target_bones(self, context)
-
-        if active_pose is None:
-            return {'CANCELLED'}
-
-        # Add COPY_ROTATION
-        add_copy_rotation(context, active=active_pose, target_name=target_pose.name)
-
-        return {'FINISHED'}
-
-
-# Add COPY_LOCATION
-def add_copy_location(context, active, target_name, influence=1.0):
-    const = active.constraints.new('COPY_LOCATION')
-    const.target = context.active_object
-    const.subtarget = target_name
-    const.target_space = 'LOCAL'
-    const.owner_space = 'LOCAL'
-    const.influence = influence
-
-
-class B2PMXEM_OT_AddCopyLoc(bpy.types.Operator):
-    '''Add Copy Location Constraint to the active Bone for MMD'''
-    bl_idname = "b2pmxem.add_location"
-    bl_label = "Add Copy Location"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.active_object
-        return (obj and obj.type == 'ARMATURE' and obj.mode == 'POSE')
-
-    def execute(self, context):
-        active_pose, target_pose = get_target_bones(self, context)
-
-        if active_pose is None:
-            return {'CANCELLED'}
-
-        # Add COPY_LOCATION
-        add_copy_location(context, active=active_pose, target_name=target_pose.name)
-
-        return {'FINISHED'}
-
-
 # Add LIMIT_ROTATION
 def add_limit_rotation(context, active):
     const = active.constraints.new('LIMIT_ROTATION')
@@ -553,29 +497,6 @@ def add_limit_rotation(context, active):
     const.use_limit_z = True
     const.owner_space = 'LOCAL'
     active.lock_rotation = [True, False, True]
-
-
-class B2PMXEM_OT_AddLimit(bpy.types.Operator):
-    '''Add Limit Rotation Constraint to the active Bone for MMD'''
-    bl_idname = "b2pmxem.limit_rotation"
-    bl_label = "Add Limit Rotation"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.active_object
-        return (obj and obj.type == 'ARMATURE' and obj.mode == 'POSE')
-
-    def execute(self, context):
-        active_pose = get_active_bone(self, context)
-
-        if active_pose is None:
-            return {'CANCELLED'}
-
-        # Add LIMIT_ROTATION
-        add_limit_rotation(context, active=active_pose)
-
-        return {'FINISHED'}
 
 
 # vertex_groups
@@ -1384,60 +1305,6 @@ class B2PMXEM_OT_ToStance(bpy.types.Operator):
         rotate_pose(context, self.to_A_stance)
         return {'FINISHED'}
 
-
-class B2PMXEM_OT_LockLoc(bpy.types.Operator):
-    '''Toggle Lock XYZ location of selected bones'''
-    bl_idname = "b2pmxem.lock_location"
-    bl_label = "Lock Location"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    flag: BoolProperty(  # type: ignore
-        name="Lock",
-        description="Set Lock Flag",
-        default=True, options={'SKIP_SAVE'}
-    )
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.active_object
-        return (obj and obj.type == 'ARMATURE' and obj.mode == 'POSE')
-
-    def execute(self, context):
-        for bone in context.selected_pose_bones:
-            bone.lock_location = [self.flag, self.flag, self.flag]
-
-        bpy.ops.object.posemode_toggle()
-        bpy.ops.object.posemode_toggle()
-
-        return {'FINISHED'}
-
-
-class B2PMXEM_OT_LockRot(bpy.types.Operator):
-    '''Toggle Lock XYZ rotation of selected bones'''
-    bl_idname = "b2pmxem.lock_rotation"
-    bl_label = "Lock Rotation"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    flag: BoolProperty(  # type: ignore
-        name="Lock",
-        description="Set Lock Flag",
-        default=True,
-        options={'SKIP_SAVE'}
-    )
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.active_object
-        return (obj and obj.type == 'ARMATURE' and obj.mode == 'POSE')
-
-    def execute(self, context):
-        for bone in context.selected_pose_bones:
-            bone.lock_rotation = [self.flag, self.flag, self.flag]
-
-        bpy.ops.object.posemode_toggle()
-        bpy.ops.object.posemode_toggle()
-
-        return {'FINISHED'}
 
 
 class B2PMXEM_OT_AddDriver(bpy.types.Operator):

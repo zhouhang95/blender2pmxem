@@ -742,16 +742,9 @@ class B2PMXEM_PT_PosePanel(bpy.types.Panel):
         row = col.row(align=True)
         row.operator(add_function.B2PMXEM_OT_ClearPose.bl_idname, text="Clear", icon="LOOP_BACK")
         row.operator(add_function.B2PMXEM_OT_RebindArmature.bl_idname, text="Rebind", icon="POSE_HLT")
-        col.separator()
-        col.operator(add_function.B2PMXEM_OT_LockLoc.bl_idname, icon="LOCKED").flag = True
-        col.operator(add_function.B2PMXEM_OT_LockRot.bl_idname, icon="LOCKED").flag = True
 
         col = layout.column(align=True)
         col.label(text="Constraints:")
-
-        col.operator(add_function.B2PMXEM_OT_AddCopyLoc.bl_idname, icon="LIBRARY_DATA_DIRECT")
-        col.operator(add_function.B2PMXEM_OT_AddCopyRot.bl_idname, icon="LIBRARY_DATA_DIRECT")
-        col.operator(add_function.B2PMXEM_OT_AddLimit.bl_idname, icon="LIBRARY_DATA_DIRECT")
 
         row = col.row(align=True)
         row.operator_menu_enum(add_function.B2PMXEM_OT_AddIK.bl_idname, 'type', icon="LIBRARY_DATA_DIRECT")
@@ -860,11 +853,6 @@ classes = [
     add_function.B2PMXEM_OT_TwistBones,
     add_function.B2PMXEM_OT_ClearPose,
     add_function.B2PMXEM_OT_RebindArmature,
-    add_function.B2PMXEM_OT_LockRot,
-    add_function.B2PMXEM_OT_LockLoc,
-    add_function.B2PMXEM_OT_AddCopyLoc,
-    add_function.B2PMXEM_OT_AddCopyRot,
-    add_function.B2PMXEM_OT_AddLimit,
     add_function.B2PMXEM_OT_AddIK,
     add_function.B2PMXEM_OT_MuteIK,
     object_applymodifier.B2PMXEM_OT_ApplyModifier,
