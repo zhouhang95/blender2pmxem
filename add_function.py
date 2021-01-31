@@ -1067,7 +1067,7 @@ class B2PMXEM_OT_SleeveBones(bpy.types.Operator):
 def append_object(objname, activeflag=True):
     path_script = os.path.dirname(__file__)
     path_object = "\\Object\\"
-    file_name = "template.blend"
+    file_name = "res/template.blend"
 
     opath = "//" + file_name + path_object + objname
     dpath = os.path.join(path_script, file_name + path_object)
@@ -1110,7 +1110,7 @@ class B2PMXEM_OT_AppendTemplate(bpy.types.Operator):
 
             toJP = {}
             if prefs.use_japanese_name:
-                filepath = os.path.join(os.path.dirname(__file__), "template_dict.csv")
+                filepath = os.path.join(os.path.dirname(__file__), "res/template_dict.csv")
 
                 with open(filepath, encoding="utf-8") as csvfile:
                     reader = csv.reader(csvfile)

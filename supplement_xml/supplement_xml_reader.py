@@ -40,7 +40,7 @@ class SupplementXmlReader:
         xml_path = os.path.splitext(pmx_file_path)[0] + ".xml"
         self.has_xml_file = os.path.isfile(xml_path)
 
-        default_xml = "default_jp.xml" if use_japanese_name else "default_en.xml"
+        default_xml = 'res/' + "default_jp.xml" if use_japanese_name else "default_en.xml"
         base_path = pathlib.Path(__file__).parents[1]
         def_path = os.path.join(base_path, default_xml)
         has_def_file = os.path.isfile(def_path)
