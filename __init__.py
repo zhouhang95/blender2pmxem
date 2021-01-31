@@ -2,7 +2,6 @@ from . import add_function
 from . import global_variable
 from . import object_applymodifier
 from . import import_pmx
-from . import export_pmx
 from . import validator
 from bpy.props import StringProperty
 from bpy.props import BoolProperty
@@ -302,95 +301,6 @@ class B2PMXEM_OT_ImportBlender2Pmx(bpy.types.Operator, ImportHelper):
 
         box = layout.box()
         box.prop(self, "adjust_bone_position")
-
-
-class B2PMXEM_OT_ExportBlender2Pmx(bpy.types.Operator, ExportHelper):
-    '''Save a MMD PMX File'''
-    bl_idname = "export.pmx_data_em"
-    bl_label = "Export PMX Data (Extend)"
-    bl_options = {'PRESET'}
-
-    # ExportHelper mixin class uses this
-    filename_ext = ".pmx"
-    filter_glob: StringProperty(  # type: ignore
-        default="*.pmx",
-        options={'HIDDEN'}
-    )
-
-    encode_type: EnumProperty(  # type: ignore
-        items=(
-            ('OPT_Utf-8', "UTF-8", "To use UTF-8 encoding."),
-            ('OPT_Utf-16', "UTF-16", "To use UTF-16 encoding."),
-        ),
-        name="Encode",
-        description="Select the encoding to use",
-        default='OPT_Utf-16'
-    )
-
-    use_mesh_modifiers: BoolProperty(  # type: ignore
-        name="Apply Modifiers",
-        description="Apply modifiers (Warning, may be slow)",
-        default=False,
-    )
-    use_custom_normals: BoolProperty(  # type: ignore
-        name="Custom Normals",
-        description="Use custom normals",
-        default=False,
-    )
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.active_object
-        return (obj and obj.type == 'ARMATURE')
-
-    def execute(self, context):
-        file_name = bpy.path.basename(self.filepath)
-
-        if file_name == "":
-            bpy.ops.b2pmxem.message('INVOKE_DEFAULT', type='ERROR', line1="Filename is empty.")
-            return {'CANCELLED'}
-
-        arm_obj = context.active_object
-
-        # Remove empty materials
-        for obj in bpy.data.objects:
-            if obj.users == 0:
-                continue
-            if obj.type != 'MESH':
-                continue
-
-            # Get Weight Bone
-            mesh_parent = obj.find_armature()
-
-            if mesh_parent != arm_obj:
-                continue
-
-            # Remove empty materials
-            mats = obj.data.materials
-            index = 0
-            while index < len(mats):
-                if mats[index] is None:
-                    mats.pop(index=index)
-                    index -= 1
-                index += 1
-
-        keywords = self.as_keywords(ignore=("check_existing", "filter_glob", ))
-
-        ret = export_pmx.write_pmx_data(context, **keywords)
-        if ret == {'FINISHED'}:
-            self.report({'INFO'}, 'Export finished.')
-        return ret
-
-    def draw(self, context):
-        layout = self.layout
-
-        box = layout.box()
-        row = box.split(factor=0.3)
-        row.label(text="Encode:")
-        row.prop(self, "encode_type", text="")
-
-        box.prop(self, "use_mesh_modifiers")
-        box.prop(self, "use_custom_normals")
 
 
 #
@@ -823,10 +733,6 @@ def menu_func_import(self, context):
     self.layout.operator(B2PMXEM_OT_ImportBlender2Pmx.bl_idname, text="PMX File for MMD (Extend) (.pmx)", icon='PLUGIN')
 
 
-def menu_func_export(self, context):
-    self.layout.operator(B2PMXEM_OT_ExportBlender2Pmx.bl_idname, text="PMX File for MMD (Extend) (.pmx)", icon='PLUGIN')
-
-
 def menu_func_vg(self, context):
     self.layout.separator()
     self.layout.operator(add_function.B2PMXEM_OT_MirrorVertexGroup.bl_idname,
@@ -858,7 +764,6 @@ classes = [
     object_applymodifier.B2PMXEM_OT_ApplyModifier,
     Blender2PmxemAddonPreferences,
     Blender2PmxemProperties,
-    B2PMXEM_OT_ExportBlender2Pmx,
     B2PMXEM_OT_ImportBlender2Pmx,
     B2PMXEM_OT_MakeXML,
     B2PMXEM_OT_SaveAsXML,
@@ -874,7 +779,6 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.MESH_MT_vertex_group_context_menu.append(menu_func_vg)
-    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.app.translations.register(__name__, translation_dict)
 
@@ -883,7 +787,6 @@ def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     bpy.types.MESH_MT_vertex_group_context_menu.remove(menu_func_vg)
-    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.app.translations.unregister(__name__)
 

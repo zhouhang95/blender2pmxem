@@ -44,24 +44,3 @@ def validate_pmx(pmx_data: pmx.Model, use_ja_name: bool) -> List[str]:
 
     return result
 
-
-def validate_xml(xml_root) -> List[str]:
-    result = []
-
-    morph_b_name_list = [e.get("b_name") for e in xml_root.findall("morphs/morph")]
-    if len(morph_b_name_list) != len(set(morph_b_name_list)):
-        result.append('Morph name must be unique in XML.')
-
-    bone_name_list = [e.get("name") for e in xml_root.findall("bones/bone")]
-    if len(bone_name_list) != len(set(bone_name_list)):
-        result.append('Bone name must be unique in XML.')
-
-    rigid_name_list = [e.get("name") for e in xml_root.findall("rigid_bodies/rigid")]
-    if len(rigid_name_list) != len(set(rigid_name_list)):
-        result.append('Rigid name must be unique in XML.')
-
-    joint_name_list = [e.get("name") for e in xml_root.findall("constraints/constraint")]
-    if len(joint_name_list) != len(set(joint_name_list)):
-        result.append('Joint name must be unique in XML.')
-
-    return result
