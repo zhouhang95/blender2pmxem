@@ -387,47 +387,6 @@ def read_pmx_data(context, filepath="",
                 elif find_auto and len_const:
                     add_function.set_custom_shape(context, pb, shape=GV.ShapeAuto)
 
-            # Set IK
-            if data_bone.UseIK != 0:
-                pb["IKLoops"] = data_bone.IK.Loops
-                pb["IKLimit"] = data_bone.IK.Limit
-
-                if len(data_bone.IK.Member) > 0:
-                    ik_name = blender_bone_list[data_bone.IK.Member[0].Index]
-                    new_ik = arm_obj.pose.bones[ik_name].constraints.new("IK")
-                    new_ik.target = arm_obj
-                    new_ik.subtarget = blender_bone_list[bone_index]
-                    new_ik.chain_count = len(data_bone.IK.Member)
-
-                for ik_member in data_bone.IK.Member:
-                    if ik_member.UseLimit == 1:
-                        member_name = blender_bone_list[ik_member.Index]
-                        pose_member = arm_obj.pose.bones[member_name]
-
-                        if ik_member.UpperLimit.x == ik_member.LowerLimit.x:
-                            pose_member.lock_ik_x = True
-
-                        else:
-                            pose_member.use_ik_limit_x = True
-                            pose_member.ik_min_x = ik_member.LowerLimit.x
-                            pose_member.ik_max_x = ik_member.UpperLimit.x
-
-                        if ik_member.UpperLimit.y == ik_member.LowerLimit.y:
-                            pose_member.lock_ik_y = True
-
-                        else:
-                            pose_member.use_ik_limit_y = True
-                            pose_member.ik_min_y = ik_member.LowerLimit.y
-                            pose_member.ik_max_y = ik_member.UpperLimit.y
-
-                        if ik_member.UpperLimit.z == ik_member.LowerLimit.z:
-                            pose_member.lock_ik_z = True
-
-                        else:
-                            pose_member.use_ik_limit_z = True
-                            pose_member.ik_min_z = ik_member.LowerLimit.z
-                            pose_member.ik_max_z = ik_member.UpperLimit.z
-
         bpy.ops.object.mode_set(mode="EDIT", toggle=False)
 
         # Adjust Bone Position
