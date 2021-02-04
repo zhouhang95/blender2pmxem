@@ -1,5 +1,6 @@
 import bpy
 import mathutils
+from mathutils import Vector
 import os
 import math
 import re
@@ -79,7 +80,6 @@ def Search_Leg_Dummy(bone_name):
 
 
 def Set_Bone_Position(pmx_data, arm_dat, blender_bone_list, fix=False):
-    bpy.ops.object.mode_set(mode="EDIT", toggle=False)
     bone_id = {}
 
     for (bone_index, data_bone) in enumerate(pmx_data.Bones):
@@ -150,9 +150,6 @@ def Set_Bone_Position(pmx_data, arm_dat, blender_bone_list, fix=False):
             else:
                 eb.tail = convert_translate(data_bone.Position + mathutils.Vector((0, 0, 1.0)))
 
-    # Bones Update
-    bpy.ops.object.mode_set(mode='OBJECT')
-
     return bone_id
 
 
@@ -201,8 +198,11 @@ def read_pmx_data(context, filepath="",
     arm_obj.select_set(True)
 
     # Set Bone Position
+    bpy.ops.object.mode_set(mode="EDIT", toggle=False)
     bone_id = Set_Bone_Position(pmx_data, arm_dat, blender_bone_list)
+    add_ik_pole(arm_dat)
 
+    bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.mode_set(mode="POSE", toggle=False)
 
     set_bone_status(context, pmx_data, arm_obj, arm_dat, blender_bone_list, prefs)
@@ -247,51 +247,66 @@ def read_pmx_data(context, filepath="",
     GV.SetVertCount(len(pmx_data.Vertices))
     GV.PrintTime(filepath, type='import')
 
+def add_ik_pole(arm_dat):
+    for lr in ['L', 'R']:
+        foot_ik_pole = arm_dat.edit_bones.new('foot_ik_pole.{}'.format(lr))
+        foot_ik = arm_dat.edit_bones.get('foot_ik.{}'.format(lr))
+        foot_ik_pole.head = foot_ik.head + Vector((0, -1, 0.5))
+        foot_ik_pole.tail = foot_ik.head + Vector((0, -1, 0.6))
+        foot_ik_pole.parent = foot_ik
 
 def set_ik_bone(pmx_data, arm_obj, blender_bone_list):
     for (bone_index, data_bone) in enumerate(pmx_data.Bones):
         bone_name = blender_bone_list[bone_index]
         pb = arm_obj.pose.bones.get(bone_name)
         # Set IK
-        if data_bone.UseIK != 0:
-            pb["IKLoops"] = data_bone.IK.Loops
-            pb["IKLimit"] = data_bone.IK.Limit
+        if data_bone.UseIK == False:
+            continue
+        pb["IKLoops"] = data_bone.IK.Loops
+        pb["IKLimit"] = data_bone.IK.Limit
 
-            if len(data_bone.IK.Member) > 0:
-                ik_name = blender_bone_list[data_bone.IK.Member[0].Index]
-                new_ik = arm_obj.pose.bones[ik_name].constraints.new("IK")
-                new_ik.target = arm_obj
-                new_ik.subtarget = blender_bone_list[bone_index]
-                new_ik.chain_count = len(data_bone.IK.Member)
+        if len(data_bone.IK.Member) > 0:
+            ik_name = blender_bone_list[data_bone.IK.Member[0].Index]
+            new_ik = arm_obj.pose.bones[ik_name].constraints.new("IK")
+            new_ik.target = arm_obj
+            new_ik.subtarget = blender_bone_list[bone_index]
+            new_ik.chain_count = len(data_bone.IK.Member)
 
-            for ik_member in data_bone.IK.Member:
-                if ik_member.UseLimit == 1:
-                    member_name = blender_bone_list[ik_member.Index]
-                    pose_member = arm_obj.pose.bones[member_name]
+        for ik_member in data_bone.IK.Member:
+            if ik_member.UseLimit != 1:
+                continue
+            member_name = blender_bone_list[ik_member.Index]
+            pose_member = arm_obj.pose.bones[member_name]
 
-                    if ik_member.UpperLimit.x == ik_member.LowerLimit.x:
-                        pose_member.lock_ik_x = True
+            if ik_member.UpperLimit.x == ik_member.LowerLimit.x:
+                pose_member.lock_ik_x = True
 
-                    else:
-                        pose_member.use_ik_limit_x = True
-                        pose_member.ik_min_x = ik_member.LowerLimit.x
-                        pose_member.ik_max_x = ik_member.UpperLimit.x
+            else:
+                pose_member.use_ik_limit_x = True
+                pose_member.ik_min_x = ik_member.LowerLimit.x
+                pose_member.ik_max_x = ik_member.UpperLimit.x
 
-                    if ik_member.UpperLimit.y == ik_member.LowerLimit.y:
-                        pose_member.lock_ik_y = True
+            if ik_member.UpperLimit.y == ik_member.LowerLimit.y:
+                pose_member.lock_ik_y = True
 
-                    else:
-                        pose_member.use_ik_limit_y = True
-                        pose_member.ik_min_y = ik_member.LowerLimit.y
-                        pose_member.ik_max_y = ik_member.UpperLimit.y
+            else:
+                pose_member.use_ik_limit_y = True
+                pose_member.ik_min_y = ik_member.LowerLimit.y
+                pose_member.ik_max_y = ik_member.UpperLimit.y
 
-                    if ik_member.UpperLimit.z == ik_member.LowerLimit.z:
-                        pose_member.lock_ik_z = True
+            if ik_member.UpperLimit.z == ik_member.LowerLimit.z:
+                pose_member.lock_ik_z = True
 
-                    else:
-                        pose_member.use_ik_limit_z = True
-                        pose_member.ik_min_z = ik_member.LowerLimit.z
-                        pose_member.ik_max_z = ik_member.UpperLimit.z
+            else:
+                pose_member.use_ik_limit_z = True
+                pose_member.ik_min_z = ik_member.LowerLimit.z
+                pose_member.ik_max_z = ik_member.UpperLimit.z
+
+    for lr in ['L', 'R']:
+        shin = bpy.context.object.pose.bones["shin." + lr]
+        shin.constraints["IK"].pole_target = arm_obj
+        shin.constraints["IK"].pole_subtarget = "foot_ik_pole." + lr
+        shin.constraints["IK"].pole_angle = 1.5708
 
 def set_bone_status(context, pmx_data, arm_obj, arm_dat, blender_bone_list, prefs):
     for (bone_index, data_bone) in enumerate(pmx_data.Bones):
