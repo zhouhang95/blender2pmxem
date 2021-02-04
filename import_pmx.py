@@ -1,12 +1,7 @@
-# if "bpy" in locals():
-#    import imp
-#    if "pmx" in locals():
-#        imp.reload(pmx)
 import bpy
 import mathutils
 import os
 import math
-import xml.etree.ElementTree as etree
 import re
 
 from . import add_function, global_variable
@@ -28,33 +23,14 @@ from typing import Tuple
 GV = global_variable.Init()
 
 
-GlobalMatrix = mathutils.Matrix(
-    (
-        [1, 0, 0, 0],
-        [0, 0, 1, 0],
-        [0, 1, 0, 0],
-        [0, 0, 0, 12.5]
-    ))
-
-
-def GT(vec, mat):  # GlobalTransformation
-    v = vec.copy()
-    v.resize_4d()
-
-    w = mat @ v
-    w = w / w.w
-    w.resize_3d()
+def convert_translate(vec):  # GlobalTransformation
+    w = vec * 0.08
+    w = w.xzy
     return w
 
 
-def GT_normal(vec, mat):  # GlobalTransformation
-    v = vec.copy()
-    v.resize_4d()
-
-    w = mat @ v
-    w = w / w.w
-    w.resize_3d()
-    w.normalize()
+def convert_normal(vec):  # GlobalTransformation
+    w = vec.xzy
     return w
 
 
@@ -136,7 +112,7 @@ def Set_Bone_Position(pmx_data, arm_dat, blender_bone_list, fix=False):
         else:
             eb = arm_dat.edit_bones.new(bone_name)
 
-        eb.head = GT(data_bone.Position, GlobalMatrix)
+        eb.head = convert_translate(data_bone.Position)
         eb.roll = 0
         # eb.hide = (data_bone.Visible == 0)
         eb.use_connect = False
@@ -158,29 +134,29 @@ def Set_Bone_Position(pmx_data, arm_dat, blender_bone_list, fix=False):
 
         # Set TailPosition
         if data_bone.ToConnectType == 0:
-            eb.tail = GT(data_bone.Position + data_bone.TailPosition, GlobalMatrix)
+            eb.tail = convert_translate(data_bone.Position + data_bone.TailPosition)
 
         elif data_bone.ChildIndex != -1:
-            eb.tail = GT(pmx_data.Bones[data_bone.ChildIndex].Position, GlobalMatrix)
+            eb.tail = convert_translate(pmx_data.Bones[data_bone.ChildIndex].Position)
 
         else:
-            eb.tail = GT(data_bone.Position + mathutils.Vector((0, 0, 1.0)), GlobalMatrix)
+            eb.tail = convert_translate(data_bone.Position + mathutils.Vector((0, 0, 1.0)))
 
         if data_bone.UseFixedAxis == 1 and eb.head == eb.tail:
             if fixed_axis is None:
-                eb.tail = GT(data_bone.Position + data_bone.FixedAxis, GlobalMatrix)
+                eb.tail = convert_translate(data_bone.Position + data_bone.FixedAxis)
             else:
                 eb.tail = eb.head + fixed_axis
 
         if eb.head == eb.tail:
             if data_bone.AdditionalBoneIndex >= 0 and pmx_data.Bones[data_bone.AdditionalBoneIndex].UseFixedAxis == 1:
                 if fixed_axis is None:
-                    eb.tail = GT(data_bone.Position +
-                                 pmx_data.Bones[data_bone.AdditionalBoneIndex].FixedAxis, GlobalMatrix)
+                    eb.tail = convert_translate(data_bone.Position +
+                                 pmx_data.Bones[data_bone.AdditionalBoneIndex].FixedAxis)
                 else:
                     eb.tail = eb.head + fixed_axis
             else:
-                eb.tail = GT(data_bone.Position + mathutils.Vector((0, 0, 1.0)), GlobalMatrix)
+                eb.tail = convert_translate(data_bone.Position + mathutils.Vector((0, 0, 1.0)))
 
     # Bones Update
     bpy.ops.object.mode_set(mode='OBJECT')
@@ -226,10 +202,8 @@ def read_pmx_data(context, filepath="",
     bpy.context.view_layer.objects.active = arm_obj
     bpy.context.view_layer.update()
 
-    # Make XML
     blender_bone_list = {
-        bone_index: Get_JP_or_EN_Name(pmx_bone.Name, pmx_bone.Name_E, use_japanese_name, bone_mode=True)
-        for (bone_index, pmx_bone) in enumerate(pmx_data.Bones)
+        bone_index: pmx_bone.Name_E for (bone_index, pmx_bone) in enumerate(pmx_data.Bones)
     }
 
     arm_obj.select_set(True)
@@ -426,8 +400,8 @@ def add_vertex(pmx_data, mesh, vert_group, vert_group_index):
     mesh.vertices.add(len(pmx_data.Vertices))
 
     for vert_index, vert_data in enumerate(pmx_data.Vertices):
-        mesh.vertices[vert_index].co = GT(vert_data.Position, GlobalMatrix)
-        mesh.vertices[vert_index].normal = GT_normal(vert_data.Normal, GlobalMatrix)
+        mesh.vertices[vert_index].co = convert_translate(vert_data.Position)
+        mesh.vertices[vert_index].normal = convert_normal(vert_data.Normal)
         # mesh.vertices[vert_index].uv = pmx_data.Vertices[vert_index].UV
 
         # BDEF1
@@ -597,7 +571,7 @@ def add_shape_key(pmx_data, mesh, obj_mesh, use_japanese_name):
                 temp_key = obj_mesh.shape_key_add(name=blender_morph_name, from_mix=False)
 
                 for v in data.Offsets:
-                    temp_key.data[v.Index].co += GT(v.Move, GlobalMatrix)
+                    temp_key.data[v.Index].co += convert_translate(v.Move)
 
                 mesh.update()
 
