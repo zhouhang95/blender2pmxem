@@ -53,14 +53,6 @@ def Get_JP_or_EN_Name(jp_name, en_name, use_japanese_name, bone_mode=False):
     return tmp_name
 
 
-def Get_Edit_Bone(edit_bones, jp_name, en_name):
-    eb = edit_bones.get(jp_name)
-    if eb is None:
-        eb = edit_bones.get(en_name)
-
-    return eb
-
-
 def Search_Eyes(bone_name):
     return bone_name in ["eyes", "両目"]
 
