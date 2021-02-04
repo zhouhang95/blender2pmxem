@@ -279,9 +279,6 @@ def read_pmx_data(context, filepath="",
 
     bpy.ops.object.mode_set(mode="EDIT", toggle=False)
 
-    # Adjust Bone Position
-    if adjust_bone_position:
-        adjust_bone_pos(arm_dat)
 
     # BoneItem Direction
     bpy.ops.armature.select_all(action='SELECT')
@@ -436,85 +433,6 @@ def set_bone_status(context, pmx_data, arm_obj, arm_dat, blender_bone_list, pref
         # Set Custom Shape
         if prefs.use_custom_shape:
             use_custom_shape(context, pb, bone_name)
-
-
-def adjust_bone_pos(arm_dat):
-    # Get_Adjust_Data(edit_bones, jp_name, en_name)
-    arm_L, vec_arm_L, axis_arm_L, len_arm_L = Get_Adjust_Data(arm_dat.edit_bones, "腕_L", "arm_L")
-    arm_R, vec_arm_R, axis_arm_R, len_arm_R = Get_Adjust_Data(arm_dat.edit_bones, "腕_R", "arm_R")
-
-    elb_L, vec_elb_L, axis_elb_L, len_elb_L = Get_Adjust_Data(arm_dat.edit_bones, "ひじ_L", "elbow_L")
-    elb_R, vec_elb_R, axis_elb_R, len_elb_R = Get_Adjust_Data(arm_dat.edit_bones, "ひじ_R", "elbow_R")
-
-    for eb in arm_dat.edit_bones:
-        # Find name (True or False)
-        find_master = Search_Master(eb.name)
-        find_eyes = Search_Eyes(eb.name)
-        find_twist_m = Search_Twist_Master(eb.name)
-        find_twist_n = Search_Twist_Num(eb.name)
-        find_auto = Search_Auto_Bone(eb.name)
-        find_leg_d = Search_Leg_Dummy(eb.name)
-
-        # Master
-        if find_master:
-            eb_center = Get_Edit_Bone(arm_dat.edit_bones, "センター", "center")
-
-            if eb_center is not None:
-                eb.head = [0.0, 0.0, 0.0]
-                eb.tail = eb_center.head
-
-        # Eyes
-        elif find_eyes:
-            eb_eye = Get_Edit_Bone(arm_dat.edit_bones, "目_L", "eye_L")
-
-            if eb_eye is not None:
-                eb.head.x = 0.0
-                eb.head.y = 0.0
-                eb.head.z = eb.tail.z = eb_eye.head.z * 1.16
-                eb.tail.x = 0.0
-                eb.tail.y = -0.25
-
-        # Auto Bone (Sub Bone), Leg_D Bone
-        elif find_auto or find_leg_d:
-            pb = arm_obj.pose.bones[eb.name]
-
-            for const in pb.constraints:
-                if hasattr(const, "subtarget"):
-                    eb.use_connect = False
-
-                    for child in eb.children:
-
-                        child.use_connect = False
-
-                    eb_sub = arm_dat.edit_bones[const.subtarget]
-                    multi = 0.3 if find_auto else 1.0
-                    axis = (eb_sub.tail - eb_sub.head) * multi
-                    eb.head = eb_sub.head
-                    eb.tail = eb_sub.head + axis
-                    break
-
-        # Twist
-        elif find_twist_m or find_twist_n:
-            eb.use_connect = False
-
-            for child in eb.children:
-                child.use_connect = False
-
-            # Set_Adjust_Data(active, eb, vec, axis, length)
-            if re.search(r'^(\u8155|arm)', eb.name) is not None:
-                if eb.name.endswith("_L") and arm_L is not None:
-                    Set_Adjust_Data(eb, arm_L, vec_arm_L, axis_arm_L, len_arm_L)
-
-                elif eb.name.endswith("_R") and arm_R is not None:
-                    Set_Adjust_Data(eb, arm_R, vec_arm_R, axis_arm_R, len_arm_R)
-
-            else:   # "手" or "wrist"
-                if eb.name.endswith("_L") and elb_L is not None:
-                    Set_Adjust_Data(eb, elb_L, vec_elb_L, axis_elb_L, len_elb_L)
-
-                elif eb.name.endswith("_R") and elb_R is not None:
-                    Set_Adjust_Data(eb, elb_R, vec_elb_R, axis_elb_R, len_elb_R)
-
 
 def use_custom_shape(context, pb, bone_name):
     find_master = Search_Master(bone_name)
