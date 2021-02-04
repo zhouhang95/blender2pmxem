@@ -29,10 +29,12 @@ GV = global_variable.Init()
 
 
 GlobalMatrix = mathutils.Matrix(
-    ([1, 0, 0, 0],
-     [0, 0, 1, 0],
+    (
+        [1, 0, 0, 0],
+        [0, 0, 1, 0],
         [0, 1, 0, 0],
-        [0, 0, 0, 12.5]))
+        [0, 0, 0, 12.5]
+    ))
 
 
 def GT(vec, mat):  # GlobalTransformation
@@ -83,41 +85,12 @@ def Get_Edit_Bone(edit_bones, jp_name, en_name):
     return eb
 
 
-def Get_Adjust_Data(edit_bones, jp_name, en_name):
-    eb = Get_Edit_Bone(edit_bones, jp_name, en_name)
-    vec = None
-    axis = None
-    length = None
-
-    # Calc Adjust Data
-    if eb is not None:
-        vec = eb.tail - eb.head
-        axis = vec * 0.1
-        length = vec.length
-
-    return (eb, vec, axis, length)
-
-
-def Set_Adjust_Data(active, eb, vec, axis, length):
-    len_active = (active.head - eb.head).length
-    active.head = eb.head + vec * (len_active / length)
-    active.tail = active.head + axis
-
-
-def Search_Master(bone_name):
-    return bone_name in ["master", "全ての親"]
-
-
 def Search_Eyes(bone_name):
     return bone_name in ["eyes", "両目"]
 
 
-def Search_Twist_Master(bone_name):
-    # 腕捩 \u8155\u6369
-    # 手捩 \u624B\u6369
-    name_jp = re.search(r'^(\u8155|\u624B)\u6369_', bone_name) is not None
-    name_en = re.search(r'^(arm|wrist)\s+twist(\.|_)', bone_name) is not None
-    return (name_jp or name_en)
+def is_tweak_control(bone_name):
+    return 'upper_arm_tweak.' in bone_name or 'forearm_tweak.' in bone_name
 
 
 def Search_Twist_Num(bone_name):
@@ -125,14 +98,6 @@ def Search_Twist_Num(bone_name):
     # 手捩 \u624B\u6369
     name_jp = re.search(r'^(\u8155|\u624B)\u6369[0-9]+', bone_name) is not None
     name_en = re.search(r'^(arm|wrist)\s+twist[0-9]+', bone_name) is not None
-    return (name_jp or name_en)
-
-
-def Search_Auto_Bone(bone_name):
-    # 自動 \u81EA\u52D5
-    # 補助 \u88DC\u52A9
-    name_jp = re.search(r'(\u81EA\u52D5|\u88DC\u52A9)', bone_name) is not None
-    name_en = re.search(r'(auto|sub)', bone_name) is not None
     return (name_jp or name_en)
 
 
@@ -371,11 +336,8 @@ def set_bone_status(context, pmx_data, arm_obj, arm_dat, blender_bone_list, pref
             continue
 
         # Find name (True or False)
-        find_master = Search_Master(bone_name)
         find_eyes = Search_Eyes(bone_name)
-        find_twist_m = Search_Twist_Master(bone_name)
         find_twist_n = Search_Twist_Num(bone_name)
-        find_auto = Search_Auto_Bone(bone_name)
 
         if find_twist_n:
             pb.lock_rotation = [True, False, True]
@@ -423,39 +385,28 @@ def set_bone_status(context, pmx_data, arm_obj, arm_dat, blender_bone_list, pref
             const.owner_space = 'LOCAL'
             pb.lock_rotation = [True, False, True]
 
-        if data_bone.UseLocalAxis == 0:
-            pass
-        if data_bone.AfterPhysical == 0:
-            pass
-        if data_bone.ExternalBone == 0:
-            pass
 
         # Set Custom Shape
         if prefs.use_custom_shape:
             use_custom_shape(context, pb, bone_name)
 
 def use_custom_shape(context, pb, bone_name):
-    find_master = Search_Master(bone_name)
     find_eyes = Search_Eyes(bone_name)
-    find_twist_m = Search_Twist_Master(bone_name)
     find_twist_n = Search_Twist_Num(bone_name)
-    find_auto = Search_Auto_Bone(bone_name)
     len_const = len(pb.constraints)
 
-    if find_master:
+    if bone_name == 'root':
         add_function.set_custom_shape(context, pb, shape=GV.ShapeMaster)
 
     elif find_eyes:
         add_function.set_custom_shape(context, pb, shape=GV.ShapeEyes)
 
-    elif find_twist_m and len_const:
+    elif is_tweak_control(bone_name) and len_const:
         add_function.set_custom_shape(context, pb, shape=GV.ShapeTwist1)
 
     elif find_twist_n and len_const:
         add_function.set_custom_shape(context, pb, shape=GV.ShapeTwist2)
 
-    elif find_auto and len_const:
-        add_function.set_custom_shape(context, pb, shape=GV.ShapeAuto)
 
 def add_vertex_group(pmx_data, mesh, obj_mesh, arm_dat, blender_bone_list, bone_id):
     vert_group = {}
