@@ -36,87 +36,6 @@ bl_info = {
 # global_variable
 GV = global_variable.Init()
 
-translation_dict = {
-    "ja_JP": {
-        ("*", "Failed to create some shape keys."): "いくつかのシェイプキーの作成に失敗しました。",
-        ("*", "maybe cause is merge vertex by Mirror modifier."): "多分原因はミラーモディファイアの頂点結合です。",
-        ("*", "Could not use custom split normals data."): "カスタム分割法線データを使用できませんでした。",
-        ("*", "Enable 'Auto Smooth' option."): "「自動スムーズ」オプションをONにして下さい。",
-        ("*", "or settings of modifier is incorrect."): "またはモディファイアの設定が正しくありません。",
-        ("*", "Bone name format incorrect (e.g. %s)"): "ボーン名の書式が正しくありません (例. %s)",
-        ("*", "Select %d bones"): "ボーンを%dつ選択してください",
-        ("*", "'%s' No parent bone found"): "'%s' 親ボーンが見つかりませんでした",
-        ("*", "'%s' No parent bone and child bone found"): "'%s' 親ボーンと子ボーンが見つかりませんでした",
-        ("*", "Morph Japanese name must be unique in PMX."): "PMXのモーフの日本語名が重複しています",
-        ("*", "Morph English name must be unique in PMX."): "PMXのモーフの英語名が重複しています",
-        ("*", "Bone Japanese name must be unique in PMX."): "PMXのボーンの日本語名が重複しています",
-        ("*", "Bone English name must be unique in PMX."): "PMXのボーンの英語名が重複しています",
-        ("*", "Rigid name must be unique in PMX."): "PMXの剛体の名前が重複しています",
-        ("*", "Joint name must be unique in PMX."): "PMXのジョイントの名前が重複しています",
-        ("*", "Morph name must be unique in XML."): "XMLのモーフの名前が重複しています",
-        ("*", "Bone name must be unique in XML."): "XMLのボーンの名前が重複しています",
-        ("*", "Rigid name must be unique in XML."): "XMLの剛体の名前が重複しています",
-        ("*", "Joint name must be unique in XML."): "XMLのジョイントの名前が重複しています",
-        ("*", "MMD PMX Format (Extend)"): "MMD PMXフォーマット (機能拡張版)",
-        ("*", "Import-Export PMX model data"): "PMXモデルをインポート・エクスポートできます",
-        ("*", "File > Import-Export"): "ファイル > インポート・エクスポート",
-        ("Operator", "Import PMX Data (Extend)"): "PMXインポート (機能拡張版)",
-        ("Operator", "Export PMX Data (Extend)"): "PMXエクスポート (機能拡張版)",
-        ("*", "Load a MMD PMX File"): "PMXファイルを読み込みます",
-        ("*", "Save a MMD PMX File"): "PMXファイルを出力します",
-        ("*", "Make a MMD xml file, and update materials"): "PMX出力用のxmlファイルを作成し、マテリアルを更新します",
-        ("Operator", "Make XML File"): "XMLファイル作成",
-        ("Operator", "Delete _R"): "右側を削除",
-        ("Operator", "Select _L"): "左側を選択",
-        ("Operator", "Add Auto Bone"): "自動ボーンを追加",
-        ("Operator", "Add Twist Bones"): "捩りボーンを追加",
-        ("Operator", "Add Sleeve IK Bones"): "袖IKボーンを追加",
-        ("Operator", "Mirror Bones"): "ボーンをX軸ミラー",
-        ("Operator", "Rename Chain"): "縦列をリネーム",
-        ("Operator", "Replace . to _"): ". を _ に置換",
-        ("Operator", "to L/R"): "L/Rに変換",
-        ("Operator", "to Number"): "連番に変換",
-        ("*", "Leg"): "足",
-        ("*", "Toe"): "つま先",
-        ("*", "Necktie"): "ネクタイ",
-        ("Operator", "Add IK"): "IKを追加",
-        ("Operator", "to T pose"): "T ポーズへ",
-        ("Operator", "to A pose"): "A ポーズへ",
-        ("Operator", "Rebind"): "リバインド",
-        ("Operator", "Lock Location"): "移動不可にする",
-        ("Operator", "Lock Rotation"): "回転不可にする",
-        ("Operator", "Add Copy Location"): "移動+を追加",
-        ("Operator", "Add Copy Rotation"): "回転+を追加",
-        ("Operator", "Add Limit Rotation"): "軸制限を追加",
-        ("*", "Solidify Edge:"): "輪郭線:",
-        ("Operator", "Append Template Armature"): "アーマチュアの雛形をアペンド",
-        ("*", "Mirror active vertex group (L/R)"): "ミラー反転した新しい頂点グループを追加 (L/R)",
-        ("Operator", "PMX File for MMD (Extend) (.pmx)"): "PMXファイル for MMD (機能拡張版) (.pmx)",
-        ("*", "Chibi"): "ちび",
-        ("*", "Shoulder"): "肩",
-        ("*", "Arm"): "腕",
-        ("*", "Use Japanese Bone name"): "日本語のボーン名を使う",
-        ("*", "Use Custom Shape"): "カスタムシェイプを使う",
-        ("*", "Append with T stance"): "Tスタンスでアペンドする",
-        ("*", "Arm"): "腕",
-        ("*", "Number of .xml old versions:"): "xmlファイルのバックアップのバージョン数:",
-        ("*", "Angle of T stance and A stance:"): "TスタンスとAスタンスの間の角度:",
-        ("*", "Number of Twist link bones:"): "捩りで連動するボーン数:",
-        ("*", "Auto Bone influence:"): "自動ボーンの初期影響値:",
-        ("*", "Rename Chain threshold:"): "L/Rにリネームする際のしきい値:",
-        ("*", "Filename is empty."): "ファイル名が空です。",
-        ("*", "Some Texture file not found."): "いくつかのテクスチャファイルが見つかりません。",
-        ("*", "See the console log for more information."): "詳細はコンソール・ログを参照してください。",
-        ("*", "Adjust bone position"): "ボーンの位置を自動調整する",
-        ("*", "Fix Bones:"): "ボーン修正:",
-        ("*", "File Select:"): "ファイルを選択:",
-        ("*", "Fix"): "修正",
-        ("*", "Fix bone position"): "ボーンの位置を修正する",
-        ("*", "Transfer"): "転送",
-        ("*", "Transfer bones and weights"): "ボーンとウェイトを転送する",
-        ("*", "Export finished."): "エクスポートが完了しました",
-    }
-}
 
 
 # ------------------------------------------------------------------------
@@ -780,7 +699,6 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.MESH_MT_vertex_group_context_menu.append(menu_func_vg)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
-    bpy.app.translations.register(__name__, translation_dict)
 
 
 def unregister():
